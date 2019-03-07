@@ -47,8 +47,6 @@
 (define (firstGen alignment)
     (append (list(portero)) (list(defensa (car alignment))) (list(volante (cadr alignment)))  (list(delantero (caddr alignment)))))
 
-;(define (nextGen ParentsA ParentsB)
- ;   (append (nextGoalkeepers (car ParentsA) (car ParentsB)) (nextDefenders (cadr ParentsA) (cadr ParentsB)) (nextMidfielders (caddr ParentsA) (caddr ParentsB)) (nextForwards (cadddr ParentsA) (cadddr ParentsB))))
 (define (nextGoalkeepers ParentsA ParentsB)
     (append (nextGoalkeepers-aux ParentsA ParentsB '()) (nextGoalkeepers-aux ParentsB ParentsA '())))
 
@@ -125,4 +123,27 @@
             (append (crossover (cadddr EquipoA) (cadddr EquipoB) '()) 
                     (crossover (cadddr EquipoB) (cadddr EquipoA) '())))))
 
+(define (hijosEquipo EquipoA EquipoB)
+    (append (list (fitnessPorteros (hijosPortero EquipoA EquipoB))))) ;(fitnessDefensas (list (hijosDefensas EquipoA EquipoB))) (fitnessMedioCampistas(list(hijosMedio EquipoA EquipoB))) (fitnessDelanteros (list (hijosDelantero EquipoA EquipoB)))))
 
+
+(define (fitnessPorteros porterosLista)
+    (cond 
+        ((null? porterosLista) 
+            porterosLista)
+        (else  
+            (cons (fitnessPortero (car porterosLista)) (fitnessPorteros (cdr porterosLista))))))
+(define (mutacion ListaJugadoresMutar porcentajeMutacion)
+    (cond 
+        ((null? ListaJugadoresMutar)
+            ListaJugadoresMutar)
+        ((equal? (random 1 (+ (quotient 100 porcentajeMutacion) 1)) (random 1 (+ (quotient 100 porcentajeMutacion) 1))) 
+            (cons (mutacion-aux (car ListaJugadoresMutar) (random 3)) (mutacion (cdr ListaJugadoresMutar) porcentajeMutacion)))
+        (else 
+            (cons (car ListaJugadoresMutar) (mutacion (cdr ListaJugadoresMutar) porcentajeMutacion)))))
+(define (mutacion-aux individuoAMutar campoMutar)
+    (cond 
+        ((zero? campoMutar) 
+            (cons (random 1 11) (cdr individuoAMutar)))
+        (else 
+            (cons (car individuoAMutar) (mutacion-aux (cdr individuoAMutar) (- campoMutar 1))))))
