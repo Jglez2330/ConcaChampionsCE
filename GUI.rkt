@@ -1,6 +1,7 @@
 #lang racket
 (require (lib "graphics.ss" "graphics")); Librería de gráficos simples
 (open-graphics); Se abre la librería
+(require racket/format)
 
 (define VentanaPrincipal (open-viewport "ConcaChampionsCE" 1200 650)); Se abre la ventana tipo viewport
 (define VentanaOculta (open-pixmap "ConcaChampionsCE" 1200 650));Se abre una ventana tipo pixmap (que permanece oculta), aquí se dibujan los elementos de la interfaz
@@ -11,6 +12,15 @@
 (define (StringGen) ((draw-string VentanaOculta) (make-posn 10 20 )  "GENERACIÓN:" "black"))
 (define (StringRojo) ((draw-string VentanaOculta) (make-posn 380 20 )  "ROJO:" "black"))
 (define (StringAzul) ((draw-string VentanaOculta) (make-posn 800 20 )  "AZUL:" "black"))
+(define (GoalString) ((draw-string VentanaOculta) (make-posn  540 335 )  "GOOOOOOOOOOL" "black"))
+
+;;Puntuaciones
+(define (Puntuacion puntosA puntosR)
+  (PuntuacionRojo puntosR)
+  (PuntuacionAzul puntosA))
+
+(define (PuntuacionRojo puntos) ((draw-string VentanaOculta) (make-posn 440 20 )  (~a puntos) "black"))
+(define (PuntuacionAzul puntos) ((draw-string VentanaOculta) (make-posn 860 20 )  (~a puntos) "black"))
 
 ;Marco Izquierda (MI)
 (define (PosteSuperiorMI) ((draw-solid-rectangle VentanaOculta) (make-posn 0 250 ) 70 10 "black"))
@@ -66,15 +76,28 @@
 (define (CentroCancha) (list (LineaSuperiorLC)(LineaInferiorLC)(CirculoNegroLC)(CirculoVerdeLC)))
 (define (Equipo1)(list (Jugador11)(Jugador12)(Jugador13)(Jugador14)(Jugador15)(Jugador16)(Jugador17)(Jugador18)(Jugador19)(Jugador110)(Jugador111)))
 (define (Equipo2)(list (Jugador21)(Jugador22)(Jugador23)(Jugador24)(Jugador25)(Jugador26)(Jugador27)(Jugador28)(Jugador29)(Jugador210)(Jugador211)))
-(define (DibujarCancha) (begin (ElementosBasicos)(MarcoIzquierda)(MarcoDerecha)(CentroCancha)(Equipo1)(Equipo2)))
+(define (DibujarCancha puntosA puntosR) (begin (ElementosBasicos)(MarcoIzquierda)(MarcoDerecha)(CentroCancha)(Equipo1)(Equipo2) (Puntuacion puntosA puntosR)))
 
 ;Ciclo del Juego
-(define (Main)
-  (let ( (posX (random 1100)) (posY (random 500)))
-    (DibujarCancha)
-    ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white");Se prueba un movimiento básico del balón
-    (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
-    (sleep 1)
-(Main)))
+(define (Main posX posY velX velY puntosA puntosR)
+  ((cond ((and (< posX 0) (> posY 260) (< posY 390));Gol del lado izquierdo
+               (GoalString)
+               (copy-viewport VentanaOculta VentanaPrincipal)
+               (sleep 1)
+               (Main 700 310 velX velY puntosA (+ 1 puntosR)))
+         ((and (> posX 1170) (> posY 260) (< posY 390));Gol del lado derecho
+               (GoalString)
+               (copy-viewport VentanaOculta VentanaPrincipal)
+               (sleep 1)
+               (Main 700 310 velX velY (+ puntosA 1) puntosR))
+         ((< posY 0) (Main (+ posX velX) 5 velX (* velY -1) puntosA puntosR)) ;;Rebotar con el borde superior
+         ((< posX 0) (Main 5 (+ posY velY) (* velX -1) velY puntosA puntosR)) ;;Rebotar con el borde izquierdo
+         ((> posY 620)1(Main (+ posX velX) 615 velX (* velY -1) puntosA puntosR)) ;;Rebotar con el borde inferior
+         ((> posX 1170) (Main 1165 (+ posY velY) (* velX -1) velY puntosA puntosR))) ;;Rebotar con el borde derecho
+  (DibujarCancha puntosA puntosR)
+  ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white");Se prueba un movimiento básico del balón
+  (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
+  (sleep 0.01)
+(Main (+ posX velX) (+ posY velY) velX velY puntosA puntosR)))
 
-(Main)
+(Main 595 315 10 0 0 0)
