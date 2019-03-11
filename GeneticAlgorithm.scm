@@ -1,42 +1,65 @@
 #lang racket
 
 (require racket/include)
+
 ;; Funcion que recibe el gen de un individuo  y calcula el fitness de este
 ;; El gen es una matriz con el primer elemento es la velocidad,  el segundo  es la fuerza, y el tercero es la habilidad
 (define (fitnessDelantero genIndividuo)
     (list (car genIndividuo) (cadr genIndividuo) (caddr genIndividuo) (cadddr genIndividuo) (fitnessDelantero-aux genIndividuo)))
+;;
+;;
 (define (fitnessDelantero-aux genIndividuo)
     (+ (car genIndividuo) (cadr genIndividuo) (caddr genIndividuo)))
+;;
+;;
 (define (fitnessPortero genPortero)
     (list (car genPortero) (cadr genPortero) (caddr genPortero) (cadddr genPortero) (fitnessPortero-aux genPortero)))
+;;
+;;
 (define (fitnessPortero-aux genPortero)
     (+ (car genPortero) (cadr genPortero) (caddr genPortero)))
-
+;;
+;;
 (define (fitnessMedioCampista genMedioCampista)
     (list (car genMedioCampista) (cadr genMedioCampista) (caddr genMedioCampista) (cadddr genMedioCampista) (fitnessMedioCampista-aux genMedioCampista)))
+;;
+;;
 (define (fitnessMedioCampista-aux genMedioCampista)
     (+ (car genMedioCampista) (cadr genMedioCampista) (caddr genMedioCampista)))
 
+;;
+;;
+(define (fitnessDefensa genDenfensa)
+    (list (car genDenfensa) (cadr genDenfensa) (caddr genDenfensa) (cadddr genDenfensa) (fitnessDefensa-aux genDenfensa)))
+;;
+;;
+(define (fitnessDefensa-aux genDenfensa)
+    (+ (car genDenfensa) (cadr genDenfensa) (caddr genDenfensa)))
 
-
+;;
+;;
 (define (player)
     (list (+ (random 10) 1) (+ (random 10) 1) (+ (random 10) 1)))
-
+;;
+;;
 (define (portero)
     (list (append (player) (list(list 10 10)) '(0))))
-
+;;
+;;
 (define (defensa cantDefensas)
     (cond 
         ((zero? cantDefensas) 
             '())
         (else 
             (cons   (append (player) (list (list 10 10)) '(0)) (defensa (- cantDefensas 1)))))) 
-(define (volante cantVolante)
+;;
+;;
+(define (medioCampista cantMedioCampistas)
     (cond 
-        ((zero? cantVolante) 
+        ((zero? cantMedioCampistas) 
             '())
         (else 
-            (cons   (append (player) (list (list 10 10)) '(0)) (volante (- cantVolante 1)))))) 
+            (cons   (append (player) (list (list 10 10)) '(0)) (medioCampista (- cantMedioCampistas 1)))))) 
 (define (delantero cantDelantero)
     (cond 
         ((zero? cantDelantero) 
@@ -45,7 +68,7 @@
             (cons   (append (player) (list (list 10 10))'(0)) (delantero (- cantDelantero 1)))))) 
 
 (define (firstGen alignment)
-    (append (list(portero)) (list(defensa (car alignment))) (list(volante (cadr alignment)))  (list(delantero (caddr alignment)))))
+    (append (list(portero)) (list(defensa (car alignment))) (list(medioCampista (cadr alignment)))  (list(delantero (caddr alignment)))))
 
 (define (nextGoalkeepers ParentsA ParentsB)
     (append (nextGoalkeepers-aux ParentsA ParentsB '()) (nextGoalkeepers-aux ParentsB ParentsA '())))
@@ -71,8 +94,6 @@
             (crossoverMidField (cdr MidFieldersA) (cdr MidFieldersB) (append offspringMidFielders (crossoverMidField-aux (car MidFieldersA) (car MidFieldersB) ))))))
 (define (crossoverMidField-aux ParentA ParentB)
     (list(append (list (car ParentB) (cadr ParentA) (caddr ParentB))  (cdddr ParentA))))
-
-
 
 
 (define (crossover ParentsA ParentsB offspring)
@@ -124,9 +145,31 @@
                     (crossover (cadddr EquipoB) (cadddr EquipoA) '())))))
 
 (define (hijosEquipo EquipoA EquipoB)
-    (append (list (fitnessPorteros (hijosPortero EquipoA EquipoB))))) ;(fitnessDefensas (list (hijosDefensas EquipoA EquipoB))) (fitnessMedioCampistas(list(hijosMedio EquipoA EquipoB))) (fitnessDelanteros (list (hijosDelantero EquipoA EquipoB)))))
+    (append (list (fitnessPorteros (mutacion (hijosPortero EquipoA EquipoB) 77))) (list (aptitudDefensas (mutacion (hijosDefensas EquipoA EquipoB) 33))) (list (aptitudMedioCampista (mutacion (hijosMedio EquipoA EquipoB) 33))) (list (aptitudDelanteros (mutacion (hijosDelantero EquipoA EquipoB) 33)))))
 
 
+
+
+(define (aptitudDefensas defensasLista)
+    (cond 
+        ((null? defensasLista) 
+            '())
+        (else 
+            (cons (fitnessDefensa (car defensasLista)) (aptitudDefensas (cdr defensasLista))))))
+
+(define (aptitudMedioCampista medioCampistasLista)
+    (cond 
+        ((null? medioCampistasLista) 
+            '())
+        (else 
+            (cons (fitnessMedioCampista (car medioCampistasLista)) (aptitudMedioCampista (cdr medioCampistasLista))))))
+
+(define (aptitudDelanteros delanterosLista)
+    (cond 
+        ((null? delanterosLista) 
+            '())
+        (else 
+            (cons (fitnessDelantero (car delanterosLista)) (aptitudDelanteros (cdr delanterosLista))))))
 (define (fitnessPorteros porterosLista)
     (cond 
         ((null? porterosLista) 
@@ -147,3 +190,54 @@
             (cons (random 1 11) (cdr individuoAMutar)))
         (else 
             (cons (car individuoAMutar) (mutacion-aux (cdr individuoAMutar) (- campoMutar 1))))))
+(define (obtenerProximaGeneracionPorteros  portero proximaGeneracionPorterosLista)
+    (cond 
+        ((null? proximaGeneracionPorterosLista)
+            '())
+        (else 
+            (car proximaGeneracionPorterosLista))))
+(define (obtenerProximaGeneracionDefensas defensas proximaGeneracionDefensasLista)
+    (cond 
+        ((null? defensas) 
+            '())
+        ((> (fitnessDefensa-aux (car defensas)) (fitnessDefensa-aux  (car proximaGeneracionDefensasLista)))
+            (cons (car defensas) (obtenerProximaGeneracionDefensas (cdr defensas) proximaGeneracionDefensasLista)))
+        (else 
+            (cons (cambiarPosicion (car proximaGeneracionDefensasLista) (car defensas) fitnessDefensa-aux) (obtenerProximaGeneracionDefensas (cdr defensas) (cdr proximaGeneracionDefensasLista))))))
+(define (obtenerProximaGeneracionMedioCampistas medioCampistasLista hijosMedioCampistasLista)
+    (cond 
+        ((null? medioCampistasLista ) 
+            '())
+        ((> (fitnessMedioCampista-aux (car medioCampistasLista)) (fitnessMedioCampista-aux (car hijosMedioCampistasLista)))
+            (cons (car medioCampistasLista) (obtenerProximaGeneracionDefensas (cdr medioCampistasLista) hijosMedioCampistasLista)))
+        (else 
+            (cons (cambiarPosicion (car hijosMedioCampistasLista) (car medioCampistasLista) fitnessMedioCampista-aux) (obtenerProximaGeneracionMedioCampistas (cdr medioCampistasLista) (cdr hijosMedioCampistasLista))))))
+
+(define (obtenerProximaGeneracionDelanteros delanterosLista hijosDelanterosLista)
+    (cond 
+        ((null? delanterosLista) 
+            '())
+        ((> (fitnessDelantero-aux (car delanterosLista)) (fitnessDelantero-aux (car hijosDelanterosLista)))
+            (cons (car delanterosLista) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) hijosDelanterosLista)))
+        (else 
+            (cons (cambiarPosicion (car hijosDelanterosLista) (car delanterosLista) fitnessDelantero-aux) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) (cdr hijosDelanterosLista))))))
+(define (cambiarPosicion hijo padre funcionAptitud)
+    (append (list (car hijo) (cadr hijo) (caddr hijo) (cadddr padre) ) (funcionAptitud hijo)))
+
+(define (siguienteEquipo EquipoA EquipoB)
+    (list (obtenerProximaGeneracionPorteros (car EquipoA) (quicksort- (hijosPortero EquipoA EquipoB) fitnessPortero-aux)) 
+            (obtenerProximaGeneracionDefensas (cadr EquipoA) (quicksort- 
+                (hijosDefensas EquipoA EquipoB) fitnessDefensa-aux))
+            (obtenerProximaGeneracionMedioCampistas (caddr EquipoA) (quicksort- (hijosMedio EquipoA EquipoB) fitnessMedioCampista-aux))
+            (obtenerProximaGeneracionDelanteros (cadddr EquipoA) (quicksort- (hijosDelantero EquipoA EquipoB) fitnessDelantero-aux))))
+(define (quicksort- hijos funcionAptitud)
+    (cond ((null? hijos) 
+            '())
+    (else
+        (quicksort-aux (car hijos) (cdr hijos) funcionAptitud '() '()))))
+
+(define (quicksort-aux pivot lista funcionAptitud menores mayores)
+    (cond 
+        ((null? lista)(append (quicksort- menores funcionAptitud) (list pivot) (quicksort- mayores funcionAptitud)))
+        ((< (funcionAptitud pivot) (funcionAptitud (car lista))) (quicksort-aux pivot (cdr lista) funcionAptitud menores (cons (car lista) mayores)))
+        (else (quicksort-aux pivot (cdr lista) funcionAptitud (cons (car lista) menores) mayores))))
