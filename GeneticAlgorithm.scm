@@ -1,4 +1,6 @@
 #lang racket
+(provide firstGen)
+(provide siguienteEquipo)
 
 (require racket/include)
 
@@ -43,7 +45,7 @@
 ;;
 ;;
 (define (portero)
-    (list (append (player) (list(list 10 10)) '(0))))
+    (list (append (player) (list(list (random 0 1200) (random 0 650))) '(0))))
 ;;
 ;;
 (define (defensa cantDefensas)
@@ -51,7 +53,7 @@
         ((zero? cantDefensas) 
             '())
         (else 
-            (cons   (append (player) (list (list 10 10)) '(0)) (defensa (- cantDefensas 1)))))) 
+            (cons   (append (player) (list (list(random 0 1200) (random 0 650))) '(0)) (defensa (- cantDefensas 1)))))) 
 ;;
 ;;
 (define (medioCampista cantMedioCampistas)
@@ -59,13 +61,13 @@
         ((zero? cantMedioCampistas) 
             '())
         (else 
-            (cons   (append (player) (list (list 10 10)) '(0)) (medioCampista (- cantMedioCampistas 1)))))) 
+            (cons   (append (player) (list (list(random 0 1200) (random 0 650))) '(0)) (medioCampista (- cantMedioCampistas 1)))))) 
 (define (delantero cantDelantero)
     (cond 
         ((zero? cantDelantero) 
             '())
         (else 
-            (cons   (append (player) (list (list 10 10))'(0)) (delantero (- cantDelantero 1)))))) 
+            (cons   (append (player) (list (list (random 0 1200) (random 0 650)))'(0)) (delantero (- cantDelantero 1)))))) 
 
 (define (firstGen alignment)
     (append (list(portero)) (list(defensa (car alignment))) (list(medioCampista (cadr alignment)))  (list(delantero (caddr alignment)))))
