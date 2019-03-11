@@ -96,53 +96,53 @@
     (list(append (list (car ParentB) (cadr ParentA) (caddr ParentB))  (cdddr ParentA))))
 
 
-(define (crossover ParentsA ParentsB offspring)
+(define (crossover ParentsA ParentsB offspring funcionAptitud)
     (cond 
         ( (null? ParentsA )
             offspring)
         (else 
-            (crossover (cdr ParentsA) ParentsB (append offspring (crossover-aux (car ParentsA) ParentsB ))))))
+            (crossover (cdr ParentsA) ParentsB (append offspring (crossover-aux (car ParentsA) ParentsB funcionAptitud)) funcionAptitud))))
 
-(define (crossover-aux ParentA ParentsB)
+(define (crossover-aux ParentA ParentsB funcionAptitud)
     (cond 
         ((null? ParentsB) 
             '())
         (else 
             (cons 
-                (append (list (caar ParentsB) (cadr ParentA) (caddar ParentsB))  (cdddr ParentA)) 
-                (crossover-aux ParentA (cdr ParentsB)) ))))
+             (append  (list (caar ParentsB) (cadr ParentA) (caddar ParentsB)) (cdddr ParentA))
+                (crossover-aux ParentA (cdr ParentsB) funcionAptitud) ))))
 
 (define (hijosPortero  EquipoA EquipoB)
-    (append (crossover (car EquipoA) (car EquipoB) '()) 
-            (crossover (car EquipoB) (car EquipoA) '())))
+    (append (crossover (car EquipoA) (car EquipoB) '() fitnessPortero) 
+           (crossover (car EquipoB) (car EquipoA) '() fitnessPortero)))
 
 (define (hijosDefensas EquipoA EquipoB)
     (cond ((null? (cadr EquipoA)) 
-            (crossover (cadr EquipoB) (cadr EquipoB) '()))
+            (crossover (cadr EquipoB) (cadr EquipoB) '() fitnessDefensa))
         ((null? (cadr EquipoB)) 
-            (crossover (cadr EquipoA) (cadr EquipoA) '()))
+            (crossover (cadr EquipoA) (cadr EquipoA) '() fitnessDefensa))
         (else 
-            (append (crossover (cadr EquipoA) (cadr EquipoB) '()) 
-                    (crossover (cadr EquipoB) (cadr EquipoA) '())))))
+            (append (crossover (cadr EquipoA) (cadr EquipoB) '() fitnessDefensa) 
+                    (crossover (cadr EquipoB) (cadr EquipoA) '() fitnessDefensa)))))
 (define (hijosMedio EquipoA EquipoB)
     (cond 
         ((null? EquipoA) 
-            (crossover (caddr EquipoB) (caddr EquipoB) '()))
+            (crossover (caddr EquipoB) (caddr EquipoB) '() fitnessMedioCampista))
         ((null? EquipoB) 
-            (crossover (caddr EquipoA) (caddr EquipoA) '()))
+            (crossover (caddr EquipoA) (caddr EquipoA) '() fitnessMedioCampista))
         (else
-            (append (crossover (caddr EquipoA) (caddr EquipoB) '()) 
-                    (crossover (caddr EquipoB) (caddr EquipoA) '())))))
+            (append (crossover (caddr EquipoA) (caddr EquipoB) '() fitnessMedioCampista) 
+                    (crossover (caddr EquipoB) (caddr EquipoA) '() fitnessMedioCampista)))))
 
 (define (hijosDelantero EquipoA EquipoB)
     (cond 
         ((null? EquipoA) 
-            (crossover (cadddr EquipoB) (cadddr EquipoB) '()))
+            (crossover (cadddr EquipoB) (cadddr EquipoB) '() fitnessDelantero))
         ((null? EquipoB) 
-            (crossover (cadddr EquipoA) (cadddr EquipoA) '()))
+            (crossover (cadddr EquipoA) (cadddr EquipoA) '() fitnessDelantero))
         (else
-            (append (crossover (cadddr EquipoA) (cadddr EquipoB) '()) 
-                    (crossover (cadddr EquipoB) (cadddr EquipoA) '())))))
+            (append (crossover (cadddr EquipoA) (cadddr EquipoB) '() fitnessDelantero-aux) 
+                    (crossover (cadddr EquipoB) (cadddr EquipoA) '() fitnessDelantero-aux)))))
 
 (define (hijosEquipo EquipoA EquipoB)
     (append (list (fitnessPorteros (mutacion (hijosPortero EquipoA EquipoB) 77))) (list (aptitudDefensas (mutacion (hijosDefensas EquipoA EquipoB) 33))) (list (aptitudMedioCampista (mutacion (hijosMedio EquipoA EquipoB) 33))) (list (aptitudDelanteros (mutacion (hijosDelantero EquipoA EquipoB) 33)))))
@@ -201,7 +201,7 @@
         ((null? defensas) 
             '())
         ((> (fitnessDefensa-aux (car defensas)) (fitnessDefensa-aux  (car proximaGeneracionDefensasLista)))
-            (cons (car defensas) (obtenerProximaGeneracionDefensas (cdr defensas) proximaGeneracionDefensasLista)))
+            (cons (fitnessDefensa(car defensas)) (obtenerProximaGeneracionDefensas (cdr defensas) proximaGeneracionDefensasLista)))
         (else 
             (cons (cambiarPosicion (car proximaGeneracionDefensasLista) (car defensas) fitnessDefensa-aux) (obtenerProximaGeneracionDefensas (cdr defensas) (cdr proximaGeneracionDefensasLista))))))
 (define (obtenerProximaGeneracionMedioCampistas medioCampistasLista hijosMedioCampistasLista)
@@ -209,7 +209,7 @@
         ((null? medioCampistasLista ) 
             '())
         ((> (fitnessMedioCampista-aux (car medioCampistasLista)) (fitnessMedioCampista-aux (car hijosMedioCampistasLista)))
-            (cons (car medioCampistasLista) (obtenerProximaGeneracionDefensas (cdr medioCampistasLista) hijosMedioCampistasLista)))
+            (cons (fitnessMedioCampista (car medioCampistasLista)) (obtenerProximaGeneracionDefensas (cdr medioCampistasLista) hijosMedioCampistasLista)))
         (else 
             (cons (cambiarPosicion (car hijosMedioCampistasLista) (car medioCampistasLista) fitnessMedioCampista-aux) (obtenerProximaGeneracionMedioCampistas (cdr medioCampistasLista) (cdr hijosMedioCampistasLista))))))
 
@@ -218,18 +218,17 @@
         ((null? delanterosLista) 
             '())
         ((> (fitnessDelantero-aux (car delanterosLista)) (fitnessDelantero-aux (car hijosDelanterosLista)))
-            (cons (car delanterosLista) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) hijosDelanterosLista)))
+            (cons (fitnessDelantero (car delanterosLista)) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) hijosDelanterosLista)))
         (else 
             (cons (cambiarPosicion (car hijosDelanterosLista) (car delanterosLista) fitnessDelantero-aux) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) (cdr hijosDelanterosLista))))))
 (define (cambiarPosicion hijo padre funcionAptitud)
     (append (list (car hijo) (cadr hijo) (caddr hijo) (cadddr padre) ) (funcionAptitud hijo)))
 
 (define (siguienteEquipo EquipoA EquipoB)
-    (list (obtenerProximaGeneracionPorteros (car EquipoA) (quicksort- (hijosPortero EquipoA EquipoB) fitnessPortero-aux)) 
-            (obtenerProximaGeneracionDefensas (cadr EquipoA) (quicksort- 
-                (hijosDefensas EquipoA EquipoB) fitnessDefensa-aux))
-            (obtenerProximaGeneracionMedioCampistas (caddr EquipoA) (quicksort- (hijosMedio EquipoA EquipoB) fitnessMedioCampista-aux))
-            (obtenerProximaGeneracionDelanteros (cadddr EquipoA) (quicksort- (hijosDelantero EquipoA EquipoB) fitnessDelantero-aux))))
+    (list (obtenerProximaGeneracionPorteros (car EquipoA) (quicksort- (car(hijosEquipo EquipoA EquipoB)) fitnessPortero-aux)) 
+            (obtenerProximaGeneracionDefensas (cadr EquipoA) (quicksort- (cadr( hijosEquipo EquipoA EquipoB)) fitnessDefensa-aux))
+            (obtenerProximaGeneracionMedioCampistas (caddr EquipoA) (quicksort- (caddr(hijosEquipo EquipoA EquipoB)) fitnessMedioCampista-aux))
+            (obtenerProximaGeneracionDelanteros (cadddr EquipoA) (quicksort- (cadddr (hijosEquipo EquipoA EquipoB)) fitnessDelantero-aux))))
 (define (quicksort- hijos funcionAptitud)
     (cond ((null? hijos) 
             '())
