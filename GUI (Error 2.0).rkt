@@ -307,8 +307,8 @@
 ;Ciclo del Juego
 (define (Main equipos)
   ;Se obtiene la nueva generación de equipos
-  (define equipoNuevo1 (car equipos));(siguienteEquipo (car equipos) (cadr equipos)))
-  (define equipoNuevo2  (cadr equipos));(siguienteEquipo (car equipos) (cadr equipos)))
+  (define equipoNuevo1 (siguienteEquipo (car equipos) (cadr equipos)))
+  (define equipoNuevo2 (siguienteEquipo (car equipos) (cadr equipos)))
   (EstablecerCantDelanteros1 (length (cadddr equipoNuevo1)))
   (EstablecerCantDelanteros2 (length (cadddr equipoNuevo2)))
   (EstablecerCantMedios1 (length (caddr equipoNuevo1)))
