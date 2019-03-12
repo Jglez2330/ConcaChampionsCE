@@ -1,6 +1,8 @@
 #lang racket
 (provide firstGen)
 (provide siguienteEquipo)
+(provide primeraGeneracionEquipoIzquierda)
+(provide primeraGeneracionEquipoDerecha)
 
 (require racket/include)
 
@@ -40,37 +42,37 @@
 
 ;;
 ;;
-(define (player)
+(define (jugadorBase)
     (list (+ (random 10) 1) (+ (random 10) 1) (+ (random 10) 1)))
 ;;
 ;;
-(define (portero)
-    (list (append (player) (list(list (random 0 1200) (random 0 650))) '(0))))
+(define (portero posicionX)
+    (list (append (jugadorBase) (list(list posicionX 325) 0))))
 ;;
 ;;
-(define (defensa cantDefensas)
+(define (defensa cantDefensas posicionX cantDefensasOriginal)
     (cond 
         ((zero? cantDefensas) 
             '())
         (else 
-            (cons   (append (player) (list (list(random 0 1200) (random 0 650))) '(0)) (defensa (- cantDefensas 1)))))) 
+            (cons   (append (jugadorBase) (list (list posicionX (definirPosicionY cantDefensasOriginal cantDefensas)) 0 )) (defensa (- cantDefensas 1) posicionX cantDefensasOriginal)))))
 ;;
 ;;
-(define (medioCampista cantMedioCampistas)
+(define (medioCampista cantMedioCampistas posicionX cantMedioCampistasOriginal)
     (cond 
         ((zero? cantMedioCampistas) 
             '())
         (else 
-            (cons   (append (player) (list (list(random 0 1200) (random 0 650))) '(0)) (medioCampista (- cantMedioCampistas 1)))))) 
-(define (delantero cantDelantero)
+            (cons   (append (jugadorBase) (list (list posicionX (definirPosicionY cantMedioCampistasOriginal cantMedioCampistas) 0))) (medioCampista (- cantMedioCampistas 1) posicionX cantMedioCampistasOriginal))))) 
+(define (delantero cantDelantero posicionX cantDelanteroOriginal)
     (cond 
         ((zero? cantDelantero) 
             '())
         (else 
-            (cons   (append (player) (list (list (random 0 1200) (random 0 650)))'(0)) (delantero (- cantDelantero 1)))))) 
+            (cons   (append (jugadorBase) (list (list posicionX (definirPosicionY cantDelanteroOriginal cantDelantero)) 0)) (delantero (- cantDelantero 1) posicionX cantDelanteroOriginal))))) 
 
-(define (firstGen alignment)
-    (append (list(portero)) (list(defensa (car alignment))) (list(medioCampista (cadr alignment)))  (list(delantero (caddr alignment)))))
+(define (firstGen alignment posicionX)
+    (append (list (portero (abs (- posicionX 550)))) (list(defensa (car alignment) (abs (- posicionX 415)) (car alignment))) (list(medioCampista (cadr alignment) (abs (- posicionX 275)) (cadr alignment)))  (list(delantero (caddr alignment) (abs (- posicionX 140)) (caddr alignment)))))
 
 (define (nextGoalkeepers ParentsA ParentsB)
     (append (nextGoalkeepers-aux ParentsA ParentsB '()) (nextGoalkeepers-aux ParentsB ParentsA '())))
@@ -205,7 +207,7 @@
         ((> (fitnessDefensa-aux (car defensas)) (fitnessDefensa-aux  (car proximaGeneracionDefensasLista)))
             (cons (fitnessDefensa(car defensas)) (obtenerProximaGeneracionDefensas (cdr defensas) proximaGeneracionDefensasLista)))
         (else 
-            (cons (cambiarPosicion (car proximaGeneracionDefensasLista) (car defensas) fitnessDefensa-aux) (obtenerProximaGeneracionDefensas (cdr defensas) (cdr proximaGeneracionDefensasLista))))))
+            (cons (cambiarPosicion (car proximaGeneracionDefensasLista) (car defensas) fitnessDefensa) (obtenerProximaGeneracionDefensas (cdr defensas) (cdr proximaGeneracionDefensasLista))))))
 (define (obtenerProximaGeneracionMedioCampistas medioCampistasLista hijosMedioCampistasLista)
     (cond 
         ((null? medioCampistasLista ) 
@@ -213,7 +215,7 @@
         ((> (fitnessMedioCampista-aux (car medioCampistasLista)) (fitnessMedioCampista-aux (car hijosMedioCampistasLista)))
             (cons (fitnessMedioCampista (car medioCampistasLista)) (obtenerProximaGeneracionDefensas (cdr medioCampistasLista) hijosMedioCampistasLista)))
         (else 
-            (cons (cambiarPosicion (car hijosMedioCampistasLista) (car medioCampistasLista) fitnessMedioCampista-aux) (obtenerProximaGeneracionMedioCampistas (cdr medioCampistasLista) (cdr hijosMedioCampistasLista))))))
+            (cons (cambiarPosicion (car hijosMedioCampistasLista) (car medioCampistasLista) fitnessMedioCampista) (obtenerProximaGeneracionMedioCampistas (cdr medioCampistasLista) (cdr hijosMedioCampistasLista))))))
 
 (define (obtenerProximaGeneracionDelanteros delanterosLista hijosDelanterosLista)
     (cond 
@@ -222,9 +224,9 @@
         ((> (fitnessDelantero-aux (car delanterosLista)) (fitnessDelantero-aux (car hijosDelanterosLista)))
             (cons (fitnessDelantero (car delanterosLista)) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) hijosDelanterosLista)))
         (else 
-            (cons (cambiarPosicion (car hijosDelanterosLista) (car delanterosLista) fitnessDelantero-aux) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) (cdr hijosDelanterosLista))))))
+            (cons (cambiarPosicion (car hijosDelanterosLista) (car delanterosLista) fitnessDelantero) (obtenerProximaGeneracionDelanteros (cdr delanterosLista) (cdr hijosDelanterosLista))))))
 (define (cambiarPosicion hijo padre funcionAptitud)
-    (append (list (car hijo) (cadr hijo) (caddr hijo) (cadddr padre) ) (funcionAptitud hijo)))
+    (funcionAptitud (append (list (car hijo) (cadr hijo) (caddr hijo) (cadddr padre) ) )))
 
 (define (siguienteEquipo EquipoA EquipoB)
     (list (obtenerProximaGeneracionPorteros (car EquipoA) (quicksort- (car(hijosEquipo EquipoA EquipoB)) fitnessPortero-aux)) 
@@ -239,6 +241,13 @@
 
 (define (quicksort-aux pivot lista funcionAptitud menores mayores)
     (cond 
-        ((null? lista)(append (quicksort- menores funcionAptitud) (list pivot) (quicksort- mayores funcionAptitud)))
+        ((null? lista)(append (quicksort- mayores funcionAptitud) (list pivot) (quicksort- menores funcionAptitud)))
         ((< (funcionAptitud pivot) (funcionAptitud (car lista))) (quicksort-aux pivot (cdr lista) funcionAptitud menores (cons (car lista) mayores)))
         (else (quicksort-aux pivot (cdr lista) funcionAptitud (cons (car lista) menores) mayores))))
+
+(define (primeraGeneracionEquipoIzquierda formacion)
+    (firstGen formacion 600))
+(define (primeraGeneracionEquipoDerecha formacion)
+    (firstGen formacion -600))
+(define (definirPosicionY cantJugadoresOriginal cantJugadores )
+    (+ (abs (- (* (quotient 650 cantJugadoresOriginal) cantJugadores) 650)) (quotient (quotient 650 cantJugadoresOriginal) 3)))

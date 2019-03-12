@@ -217,7 +217,7 @@
 ;Función principal del juego
 (define (CCCE2019 formacion1 formacion2 cantGeneraciones)
   (EstablecerCantGeneraciones cantGeneraciones)
-  (EstablecerPrimeraGeneracion (list (firstGen formacion1) (firstGen formacion2)))
+  (EstablecerPrimeraGeneracion (list (primeraGeneracionEquipoIzquierda formacion1) (primeraGeneracionEquipoDerecha formacion2)))
   (DibujarPrimeraGeneracion PrimeraGeneracion))
 
 ;Función que me dibuja la primera generación
@@ -261,4 +261,4 @@
   (Main equipos)); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
 
 ;Se invoca al programa
-(CCCE2019 '(4 4 2) '(4 4 2) 20)
+(CCCE2019 '(0 0 10) '(4 4 2) 20)
