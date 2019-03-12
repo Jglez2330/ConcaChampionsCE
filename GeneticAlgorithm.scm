@@ -63,7 +63,7 @@
         ((zero? cantMedioCampistas) 
             '())
         (else 
-            (cons   (append (jugadorBase) (list (list posicionX (definirPosicionY cantMedioCampistasOriginal cantMedioCampistas) 0))) (medioCampista (- cantMedioCampistas 1) posicionX cantMedioCampistasOriginal))))) 
+            (cons   (append (jugadorBase) (list (list posicionX (definirPosicionY cantMedioCampistasOriginal cantMedioCampistas)) 0)) (medioCampista (- cantMedioCampistas 1) posicionX cantMedioCampistasOriginal))))) 
 (define (delantero cantDelantero posicionX cantDelanteroOriginal)
     (cond 
         ((zero? cantDelantero) 
