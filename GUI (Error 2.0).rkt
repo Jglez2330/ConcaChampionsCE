@@ -236,33 +236,33 @@
 
 ;;Funciones para averiguar la nueva posicion de todos los jugadores        
 (define (PosPorteroRojo jugador)
-  (cond((< (cadr (ObtenerPosJugador jugador)) 260) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 270) 1));;Limite superior
-                    ((> (cadr (ObtenerPosJugador jugador)) 390) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 380) 1));;Limite inferior
-                    ((> (car (ObtenerPosJugador jugador)) 70) (CambiarPosJugador jugador (cons 60 (cadr (ObtenerPosJugador jugador))) 1));;Limite hacia el centro
+  (cond((< (cadr (ObtenerPosJugador jugador)) 260) (CambiarPosJugador jugador (list (car (ObtenerPosJugador jugador)) 270) 1));;Limite superior
+                    ((> (cadr (ObtenerPosJugador jugador)) 390) (CambiarPosJugador jugador (list (car (ObtenerPosJugador jugador)) 380) 1));;Limite inferior
+                    ((> (car (ObtenerPosJugador jugador)) 70) (CambiarPosJugador jugador (list 60 (cadr (ObtenerPosJugador jugador))) 1));;Limite hacia el centro
                     (else  (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1))))
 
 (define (PosDefRojo jugador)
-         (cond ((> (car (ObtenerPosJugador jugador)) 400) (CambiarPosJugador jugador (cons 390 (cadr (ObtenerPosJugador jugador))) 1))
+         (cond ((> (car (ObtenerPosJugador jugador)) 400) (CambiarPosJugador jugador (list 390 (cadr (ObtenerPosJugador jugador))) 1))
          (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
 (define (PosMedRojo jugador)
-  (cond ((> (car (ObtenerPosJugador jugador)) 800) (CambiarPosJugador jugador (cons 790 (cadr (ObtenerPosJugador jugador))) 1))
+  (cond ((> (car (ObtenerPosJugador jugador)) 800) (CambiarPosJugador jugador (list 790 (cadr (ObtenerPosJugador jugador))) 1))
         (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
 
 (define (PosDelRojo jugador)
         (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)) 
 
 (define (PosPorteroAzul jugador)
-  (cond((< (cadr (ObtenerPosJugador jugador)) 260) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 270) 1));;Limite superior
-       ((> (cadr (ObtenerPosJugador jugador)) 390) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 380) 1));;Limite inferior
-       ((< (car (ObtenerPosJugador jugador)) 1130) (CambiarPosJugador jugador (cons 1140 (cadr (ObtenerPosJugador jugador))) 1));;Limite hacia el centro
+  (cond((< (cadr (ObtenerPosJugador jugador)) 260) (CambiarPosJugador jugador (list (car (ObtenerPosJugador jugador)) 270) 1));;Limite superior
+       ((> (cadr (ObtenerPosJugador jugador)) 390) (CambiarPosJugador jugador (list (car (ObtenerPosJugador jugador)) 380) 1));;Limite inferior
+       ((< (car (ObtenerPosJugador jugador)) 1130) (CambiarPosJugador jugador (list 1140 (cadr (ObtenerPosJugador jugador))) 1));;Limite hacia el centro
        (else  (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1))))
 
 (define (PosDefAzul jugador)
-       (cond ((< (car (ObtenerPosJugador jugador)) 800) (CambiarPosJugador jugador (cons 810 (cadr (ObtenerPosJugador jugador))) 1))
+       (cond ((< (car (ObtenerPosJugador jugador)) 800) (CambiarPosJugador jugador (list 810 (cadr (ObtenerPosJugador jugador))) 1))
        (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
 
 (define (PosMedAzul jugador)
-  (cond ((< (car (ObtenerPosJugador jugador)) 400) (CambiarPosJugador jugador (cons 410 (cadr (ObtenerPosJugador jugador))) 1))
+  (cond ((< (car (ObtenerPosJugador jugador)) 400) (CambiarPosJugador jugador (list 410 (cadr (ObtenerPosJugador jugador))) 1))
         (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
 
 (define (PosDelAzul jugador)
@@ -314,7 +314,7 @@
   (EstablecerCantMedios1 (length (caddr equipoNuevo1)))
   (EstablecerCantMedios2 (length (caddr equipoNuevo2)))
   
-  ;(define nuevosEquipos (list equipoNuevo1 equipoNuevo2))
+  (define nuevosEquipos (list equipoNuevo1 equipoNuevo2))
   
   ;Se verifican las condiciones de la logica 
   (VerificarGol)
@@ -326,14 +326,14 @@
   (DibujarGeneraciones (IncrementoContadorGen))
   (DibujarPuntuacion PuntosA PuntosR)
   (DibujarBalon PosXBalon PosYBalon)
-  ;;(DibujarJugadores (VerificarColisiones equipos) 1); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
+  ;(DibujarJugadores (VerificarColisiones nuevosEquipos) 1); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
 (DibujarJugadores (MoverJugadores equipos) 1) 
      ;Se hace la llamada recursiva
   (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
   (sleep 0.01)
   (NuevaPosXBalon (+ PosXBalon VelXBalon))
   (NuevaPosYBalon (+ PosYBalon VelYBalon))
-  (Main equipos)); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
+  (Main nuevosEquipos)); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
 
 ;Se invoca al programa
 (CCCE2019 '(4 4 2) '(4 4 2) 20)
