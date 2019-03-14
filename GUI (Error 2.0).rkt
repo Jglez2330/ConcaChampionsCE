@@ -45,7 +45,7 @@
 (define (JugadorA posX posY) ((draw-solid-rectangle VentanaOculta) (make-posn posX posY ) 24 50 "blue"))
 
 
-;Variables globales importantes
+;Variables globales importantes 
 
 (define CantGeneraciones 0)
 (define (EstablecerCantGeneraciones cantGeneraciones) (set! CantGeneraciones cantGeneraciones) CantGeneraciones)
@@ -55,6 +55,8 @@
 (define CantDelanteros2 0)
 (define (EstablecerCantDelanteros1 cantDelanteros1) (set! CantDelanteros1 cantDelanteros1) CantDelanteros1)
 (define (EstablecerCantDelanteros2 cantDelanteros2) (set! CantDelanteros2 cantDelanteros2) CantDelanteros2)
+(define EsGol #f)
+(define (EstablecerEsGol esGol) (set! EsGol esGol) EsGol)
 (define CantMedios1 0)
 (define CantMedios2 0)
 (define (EstablecerCantMedios1 cantMedios1) (set! CantMedios1 cantMedios1) CantMedios1)
@@ -83,11 +85,15 @@
 (define (DibujarPuntuacion puntosA puntosR) (Puntuacion puntosA puntosR))
 
 ;Se dibuja el balón del juego
-(define (DibujarBalon posX posY) ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white"))
+(define (DibujarBalon posX posY)  (cond
+((even? (quotient ContadorGen 2) ) ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white")
+((draw-solid-rectangle VentanaOculta) (make-posn (+ posX 12) (+ posY 1) ) 5 28 "black"))
+(else ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white")
+((draw-solid-rectangle VentanaOculta) (make-posn (+ posX 1) (+ posY 12) ) 28 5 "black"))))
 (define PosXBalon 595)
 (define PosYBalon 315)
-(define VelXBalon 10)
-(define VelYBalon 10)
+(define VelXBalon 0)
+(define VelYBalon 0)
 (define (NuevaPosXBalon nuevaPosX) (set! PosXBalon nuevaPosX) PosXBalon)
 (define (NuevaPosYBalon nuevaPosY) (set! PosYBalon nuevaPosY) PosYBalon)
 (define (NuevaVelXBalon nuevaVelX) (set! VelXBalon nuevaVelX) VelXBalon)
@@ -95,12 +101,14 @@
 
 ;Se dibujan los jugadores de cada equipo
 
-(define (DibujarJugadores listaJugadores contador)
+(define (DibujarJugadores listaJugadores contador contador2)
   (cond ((null? listaJugadores) #t)
         ((equal? contador 12) (begin (JugadorA (car (ObtenerPosJugador (car listaJugadores))) (cadr (ObtenerPosJugador (car listaJugadores))))
-        (DibujarJugadores (cdr listaJugadores) contador) ))
+        ((draw-string VentanaOculta) (make-posn (+ (car (ObtenerPosJugador (car listaJugadores))) 4) (+ (cadr (ObtenerPosJugador (car listaJugadores))) 17.5) )  (~a contador2) "white")
+        (DibujarJugadores (cdr listaJugadores) contador (+ 1 contador2)) ))
         (else (begin (JugadorR (car (ObtenerPosJugador (car listaJugadores))) (cadr (ObtenerPosJugador (car listaJugadores))))
-        (DibujarJugadores (cdr listaJugadores) (+ 1 contador) ) ))
+        ((draw-string VentanaOculta) (make-posn (+ (car (ObtenerPosJugador (car listaJugadores)))4) (+ (cadr (ObtenerPosJugador (car listaJugadores)))17.5) )  (~a contador2) "white")             
+        (DibujarJugadores (cdr listaJugadores) (+ 1 contador) (+ 1 contador2) ) ))
         ))
 
 ;Verificaciones de la lógica de juego
@@ -113,18 +121,24 @@
         ((> PosXBalon 1170) (begin (NuevaPosXBalon 1165) (NuevaPosYBalon (+ PosYBalon VelYBalon)) (NuevaVelXBalon (* VelXBalon -1))))));Rebotar con el borde derecho
 
 ;Función que se encarga de verificar si el balón ingreso en alguno de los marcos
-(define (VerificarGol)
-  (cond ((and (<  PosXBalon 30) (> PosYBalon 260) (< PosYBalon 390));Gol del lado izquierdo
+(define (VerificarGol nuevosEquipos)
+  (cond ((and (<  PosXBalon 33) (> PosYBalon 260) (< PosYBalon 390));Gol del lado izquierdo
+               (EstablecerEsGol #t)
+               (DibujarCancha)
+               (DibujarJugadores (ResetearPosiciones PrimeraGeneracion nuevosEquipos) 1 1)
                (GoalString)
-               (copy-viewport VentanaOculta VentanaPrincipal)
-               (sleep 1)
+               (copy-viewport VentanaOculta VentanaPrincipal) 
+               (sleep 2)
                (IncrementoPuntosA)
                (NuevaPosXBalon 700)
                (NuevaPosYBalon 310))
-        ((and (> PosXBalon 1170) (> PosYBalon 260) (< PosYBalon 390));Gol del lado derecho
+        ((and (> PosXBalon 1170) (> PosYBalon 280) (< PosYBalon 370));Gol del lado derecho
+               (EstablecerEsGol #t)
+               (DibujarCancha)
+               (DibujarJugadores (ResetearPosiciones PrimeraGeneracion nuevosEquipos) 1 1)
                (GoalString)
                (copy-viewport VentanaOculta VentanaPrincipal)
-               (sleep 1)
+               (sleep 2)
                (IncrementoPuntosR)
                (NuevaPosXBalon 700)
                (NuevaPosYBalon 310))))
@@ -155,7 +169,7 @@
   (let* ( (posX1 (car (ObtenerPosJugador jugador1))) (posX2 (car (ObtenerPosJugador jugador2)))
           (posY1 (cadr (ObtenerPosJugador jugador1))) (posY2 (cadr(ObtenerPosJugador jugador2)))
           (L1 (- posX1 12)) (R1 (+ posX1 12)) (L2 (- posX2 12)) (R2 (+ posX2 12))
-          (A1 (- posY1 25)) (B1 (+ posY1 25)) (A2 (- posY2 25)) (B2 (+ posY2 25)) )
+          (A1 (- posY1 17.5)) (B1 (+ posY1 17.5)) (A2 (- posY2 17.5)) (B2 (+ posY2 17.5)) ) 
     (cond ((and (< L2 R1) (< L1 R2) (< A2 B1) (< A1 B2)) #t)
           (else #f))))
 
@@ -163,7 +177,7 @@
 (define (colisionJugadorBalon? jugador)
   (let* ( (posXJugador (car (ObtenerPosJugador jugador))) (posYJugador (cadr (ObtenerPosJugador jugador)))
            (DeltaX (- PosXBalon (max posXJugador (min PosXBalon (+ posXJugador 24)) )))
-           (DeltaY (- PosYBalon (max posYJugador (min PosYBalon (+ posYJugador 50)))) ))
+           (DeltaY (- PosYBalon (max posYJugador (min PosYBalon (+ posYJugador 35)))) ))
            (cond ( (< (+ (* DeltaX  DeltaX) (* DeltaY DeltaY) ) (* 15 15) ) #t)
            (else #f))))
 
@@ -203,12 +217,28 @@
   (begin (NuevaVelXBalon (ApuntarX PosXBalon PosYBalon 0 (random 0 650) (ObtenerFuerzaJugador jugador))) (NuevaVelYBalon (ApuntarY PosXBalon PosYBalon 0 (random 0 650) (ObtenerFuerzaJugador jugador))) ))
   (else (VerificarDisparo-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador)))))
 
+
+;Función para resetear las posiciones de los jugadores de las nuevas generaciones en cada gol
+
+(define (ResetearPosiciones primeraGeneracion nuevaGeneracion)
+  (let ((listaPrimeraGeneracion (PegarEquipos (car primeraGeneracion) (cadr primeraGeneracion)))
+        (listaNuevaGeneracion (PegarEquipos (car nuevaGeneracion) (cadr nuevaGeneracion))))
+        (ResetearPosiciones-aux listaPrimeraGeneracion listaNuevaGeneracion)))
+
+(define (ResetearPosiciones-aux listaPrimeraGeneracion listaNuevaGeneracion)
+  (cond ((null? listaPrimeraGeneracion) '())
+        (else (cons (CambiarPosJugador (car listaNuevaGeneracion) (ObtenerPosJugador (car listaPrimeraGeneracion)) 1)
+                    (ResetearPosiciones-aux (cdr listaPrimeraGeneracion) (cdr listaNuevaGeneracion))))))
+
+
 ;;Funcion que mueve los jugadores
+
 (define (MoverJugadores Equipos)
   (let ((listaJugadores (PegarEquipos (car Equipos) (cadr Equipos)))) (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) 1 '())))
 
 (define (MoverJugadores-aux jugador listaJugadores contador nuevaLista)
-  (cond ((null? listaJugadores) (Invertir nuevaLista '()))
+  (cond ((null? jugador) (Invertir nuevaLista '()))
+        ((null? listaJugadores) (MoverJugadores-aux '() '() (+ 1 contador) (cons (PosDelAzul jugador) nuevaLista)) )
         ;;Equipo Rojo
         ((= contador 1) ;;Portero Rojo
                (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosPorteroRojo jugador) nuevaLista)))
@@ -268,6 +298,8 @@
 (define (PosDelAzul jugador)
    (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)) 
 
+
+
 ;Funciones para apuntar, devuelven la velocidad X y Y para llegar al punto obj
 (define(ApuntarX posX posY objX objY fuerza)
   (cond (zero? (- objY posY)
@@ -285,6 +317,20 @@
     ((< objY posY) (* -1 (* (/ (abs(- objY posY)) (abs(- objX posX))) fuerza)));;
         (else (* (/ (abs(- objY posY)) (abs(- objX posX))) fuerza))))
 
+;Función que verifica la condición de finalización
+
+(define (VerificarFinal)
+  (cond ((equal? CantGeneraciones ContadorGen) #t)
+        ((and (> PuntosA PuntosR) (equal? 3 (- PuntosA PuntosR)) ) #t)
+        ((and (< PuntosA PuntosR) (equal? 3 (- PuntosR PuntosA)) ) #t)
+        (else #f)))
+
+;Función que recibe la lista con el nuevo equipo y le inserta las nuevas posiciones
+
+(define (InsertarPosNuevosEquipos listaNuevoEquipo listaNuevasPos)
+  (cond ((null? listaNuevasPos) '() )
+        (else (cons (CambiarPosJugador (car listaNuevoEquipo) (ObtenerPosJugador (car listaNuevasPos)) 1) (InsertarPosNuevosEquipos (cdr listaNuevoEquipo) (cdr listaNuevasPos)) ))))
+
 
 ;Función principal del juego
 (define (CCCE2019 formacion1 formacion2 cantGeneraciones)
@@ -299,41 +345,49 @@
   (DibujarGeneraciones (IncrementoContadorGen))
   (DibujarPuntuacion PuntosA PuntosR)
   (DibujarBalon PosXBalon PosYBalon)
-  (DibujarJugadores (VerificarColisiones equipos) 1)
+  (DibujarJugadores (VerificarColisiones equipos) 1 1)
   (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
   (sleep 1)
-  (Main equipos))
+  (Main equipos (PegarEquipos (car PrimeraGeneracion) (cadr PrimeraGeneracion)) ))
 
 ;Ciclo del Juego
-(define (Main equipos)
+(define (Main equipos listaEquipos) 
   ;Se obtiene la nueva generación de equipos
   (define equipoNuevo1 (siguienteEquipo (car equipos) (cadr equipos)))
-  (define equipoNuevo2 (siguienteEquipo (car equipos) (cadr equipos)))
+  (define equipoNuevo2  (siguienteEquipo (car equipos) (cadr equipos)))
   (EstablecerCantDelanteros1 (length (cadddr equipoNuevo1)))
   (EstablecerCantDelanteros2 (length (cadddr equipoNuevo2)))
   (EstablecerCantMedios1 (length (caddr equipoNuevo1)))
   (EstablecerCantMedios2 (length (caddr equipoNuevo2)))
-  
   (define nuevosEquipos (list equipoNuevo1 equipoNuevo2))
+  (define nuevosEquipos2 (InsertarPosNuevosEquipos (PegarEquipos (car nuevosEquipos) (cadr nuevosEquipos) ) (MoverJugadores-aux (car listaEquipos) (cdr listaEquipos) 1 '() ) ))
   
-  ;Se verifican las condiciones de la logica 
-  (VerificarGol)
+  ;Se verifican las condiciones de la logica
+  (if (equal? #t (VerificarFinal)) (Final) #f) 
+  (VerificarGol nuevosEquipos)
   (VerificarReboteBalon)
-  (VerificarDisparo equipos); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
+  (VerificarDisparo-aux (car nuevosEquipos2) (cdr nuevosEquipos2) 1)
    
-  ;Se dibujan los elementos de la interfaz
+  ;Se dibujan los elementos de la interfaz  
   (DibujarCancha)
   (DibujarGeneraciones (IncrementoContadorGen))
   (DibujarPuntuacion PuntosA PuntosR)
   (DibujarBalon PosXBalon PosYBalon)
-  ;(DibujarJugadores (VerificarColisiones nuevosEquipos) 1); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
-(DibujarJugadores (MoverJugadores equipos) 1) 
-     ;Se hace la llamada recursiva
+  (cond ((equal? EsGol #t) (EstablecerEsGol #f) (InsertarPosNuevosEquipos nuevosEquipos2 (MoverJugadores PrimeraGeneracion)) )
+        (else (DibujarJugadores (VerificarColisiones2 (MoverJugadores-aux (car nuevosEquipos2) (cdr nuevosEquipos2) 1 '() )) 1 1)))
+  
+     ;Se hace la llamada recursiva 
   (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
-  (sleep 0.01)
+  ;(sleep 0.01)
+  (sleep 0.1)
   (NuevaPosXBalon (+ PosXBalon VelXBalon))
   (NuevaPosYBalon (+ PosYBalon VelYBalon))
-  (Main nuevosEquipos)); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
+  (Main nuevosEquipos nuevosEquipos2))
+
+;Función para el caso donde termina el juego 
+
+(define (Final)
+   (sleep 2) (close-viewport VentanaPrincipal))
 
 ;Se invoca al programa
-(CCCE2019 '(4 4 2) '(4 4 2) 20)
+(CCCE2019 '(4 4 2) '(4 4 2) 10000000)

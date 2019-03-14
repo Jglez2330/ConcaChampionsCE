@@ -38,11 +38,11 @@
 (define (CirculoVerdeLC) ((draw-solid-ellipse VentanaOculta) (make-posn 515 240 ) 190 190 "green"))
 
 ;Equipo 1 (Color Rojo)
-(define (JugadorR posX posY) ((draw-solid-rectangle VentanaOculta) (make-posn posX posY ) 24 50 "red"))
+(define (JugadorR posX posY) ((draw-solid-rectangle VentanaOculta) (make-posn posX posY ) 24 35 "red"))
 
 ;Equipo 2 (Color Azul)
 
-(define (JugadorA posX posY) ((draw-solid-rectangle VentanaOculta) (make-posn posX posY ) 24 50 "blue"))
+(define (JugadorA posX posY) ((draw-solid-rectangle VentanaOculta) (make-posn posX posY ) 24 35 "blue"))
 
 
 ;Variables globales importantes
@@ -55,6 +55,12 @@
 (define CantDelanteros2 0)
 (define (EstablecerCantDelanteros1 cantDelanteros1) (set! CantDelanteros1 cantDelanteros1) CantDelanteros1)
 (define (EstablecerCantDelanteros2 cantDelanteros2) (set! CantDelanteros2 cantDelanteros2) CantDelanteros2)
+(define EsGol #f)
+(define (EstablecerEsGol esGol) (set! EsGol esGol) EsGol)
+(define CantMedios1 0)
+(define CantMedios2 0)
+(define (EstablecerCantMedios1 cantMedios1) (set! CantMedios1 cantMedios1) CantMedios1)
+(define (EstablecerCantMedios2 cantMedios2) (set! CantMedios2 cantMedios2) CantMedios2)
 
 
 ;Se definen las funciones para estar dibujando los elementos en cada ciclo del juego
@@ -79,11 +85,15 @@
 (define (DibujarPuntuacion puntosA puntosR) (Puntuacion puntosA puntosR))
 
 ;Se dibuja el balón del juego
-(define (DibujarBalon posX posY) ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white"))
+(define (DibujarBalon posX posY)  (cond
+((even? (quotient ContadorGen 2) ) ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white")
+((draw-solid-rectangle VentanaOculta) (make-posn (+ posX 12) (+ posY 1) ) 5 28 "black"))
+(else ((draw-solid-ellipse VentanaOculta) (make-posn posX posY )  30 30 "white")
+((draw-solid-rectangle VentanaOculta) (make-posn (+ posX 1) (+ posY 12) ) 28 5 "black"))))
 (define PosXBalon 595)
 (define PosYBalon 315)
-(define VelXBalon 10)
-(define VelYBalon 10)
+(define VelXBalon -10)
+(define VelYBalon -10)
 (define (NuevaPosXBalon nuevaPosX) (set! PosXBalon nuevaPosX) PosXBalon)
 (define (NuevaPosYBalon nuevaPosY) (set! PosYBalon nuevaPosY) PosYBalon)
 (define (NuevaVelXBalon nuevaVelX) (set! VelXBalon nuevaVelX) VelXBalon)
@@ -91,12 +101,14 @@
 
 ;Se dibujan los jugadores de cada equipo
 
-(define (DibujarJugadores listaJugadores contador)
+(define (DibujarJugadores listaJugadores contador contador2)
   (cond ((null? listaJugadores) #t)
         ((equal? contador 12) (begin (JugadorA (car (ObtenerPosJugador (car listaJugadores))) (cadr (ObtenerPosJugador (car listaJugadores))))
-        (DibujarJugadores (cdr listaJugadores) contador) ))
+        ((draw-string VentanaOculta) (make-posn (+ (car (ObtenerPosJugador (car listaJugadores))) 4) (+ (cadr (ObtenerPosJugador (car listaJugadores))) 17.5) )  (~a contador2) "white")
+        (DibujarJugadores (cdr listaJugadores) contador (+ 1 contador2)) ))
         (else (begin (JugadorR (car (ObtenerPosJugador (car listaJugadores))) (cadr (ObtenerPosJugador (car listaJugadores))))
-        (DibujarJugadores (cdr listaJugadores) (+ 1 contador) ) ))
+        ((draw-string VentanaOculta) (make-posn (+ (car (ObtenerPosJugador (car listaJugadores)))4) (+ (cadr (ObtenerPosJugador (car listaJugadores)))17.5) )  (~a contador2) "white")             
+        (DibujarJugadores (cdr listaJugadores) (+ 1 contador) (+ 1 contador2) ) ))
         ))
 
 ;Verificaciones de la lógica de juego
@@ -109,18 +121,24 @@
         ((> PosXBalon 1170) (begin (NuevaPosXBalon 1165) (NuevaPosYBalon (+ PosYBalon VelYBalon)) (NuevaVelXBalon (* VelXBalon -1))))));Rebotar con el borde derecho
 
 ;Función que se encarga de verificar si el balón ingreso en alguno de los marcos
-(define (VerificarGol)
-  (cond ((and (<  PosXBalon 30) (> PosYBalon 260) (< PosYBalon 390));Gol del lado izquierdo
+(define (VerificarGol nuevosEquipos)
+  (cond ((and (<  PosXBalon 33) (> PosYBalon 260) (< PosYBalon 390));Gol del lado izquierdo
+               (EstablecerEsGol #t)
+               (DibujarCancha)
+               (DibujarJugadores (ResetearPosiciones PrimeraGeneracion nuevosEquipos) 1 1)
                (GoalString)
                (copy-viewport VentanaOculta VentanaPrincipal)
-               (sleep 1)
+               (sleep 2)
                (IncrementoPuntosA)
                (NuevaPosXBalon 700)
                (NuevaPosYBalon 310))
-        ((and (> PosXBalon 1170) (> PosYBalon 260) (< PosYBalon 390));Gol del lado derecho
+        ((and (> PosXBalon 1170) (> PosYBalon 280) (< PosYBalon 370));Gol del lado derecho
+               (EstablecerEsGol #t)
+               (DibujarCancha)
+               (DibujarJugadores (ResetearPosiciones PrimeraGeneracion nuevosEquipos) 1 1)
                (GoalString)
                (copy-viewport VentanaOculta VentanaPrincipal)
-               (sleep 1)
+               (sleep 2)
                (IncrementoPuntosR)
                (NuevaPosXBalon 700)
                (NuevaPosYBalon 310))))
@@ -151,7 +169,7 @@
   (let* ( (posX1 (car (ObtenerPosJugador jugador1))) (posX2 (car (ObtenerPosJugador jugador2)))
           (posY1 (cadr (ObtenerPosJugador jugador1))) (posY2 (cadr(ObtenerPosJugador jugador2)))
           (L1 (- posX1 12)) (R1 (+ posX1 12)) (L2 (- posX2 12)) (R2 (+ posX2 12))
-          (A1 (- posY1 25)) (B1 (+ posY1 25)) (A2 (- posY2 25)) (B2 (+ posY2 25)) )
+          (A1 (- posY1 17.5)) (B1 (+ posY1 17.5)) (A2 (- posY2 17.5)) (B2 (+ posY2 17.5)) ) 
     (cond ((and (< L2 R1) (< L1 R2) (< A2 B1) (< A1 B2)) #t)
           (else #f))))
 
@@ -159,11 +177,11 @@
 (define (colisionJugadorBalon? jugador)
   (let* ( (posXJugador (car (ObtenerPosJugador jugador))) (posYJugador (cadr (ObtenerPosJugador jugador)))
            (DeltaX (- PosXBalon (max posXJugador (min PosXBalon (+ posXJugador 24)) )))
-           (DeltaY (- PosYBalon (max posYJugador (min PosYBalon (+ posYJugador 50)))) ))
+           (DeltaY (- PosYBalon (max posYJugador (min PosYBalon (+ posYJugador 35)))) ))
            (cond ( (< (+ (* DeltaX  DeltaX) (* DeltaY DeltaY) ) (* 15 15) ) #t)
            (else #f))))
 
-;Función que verifica si un jugador esta colisionando con otro en el campo
+;Función que verifica si un jugador esta colisionando con otro en el campo 
 (define (VerificarColisiones Equipos)
   (let ((listaJugadores (PegarEquipos (car Equipos) (cadr Equipos)))) (VerificarColisiones2 listaJugadores)))
 
@@ -179,7 +197,7 @@
 (define (ArreglarPosJugador jugador)
   (let ( (posX (car (ObtenerPosJugador jugador))) (posY (cadr(ObtenerPosJugador jugador))) )
     (cond ((> posY 575) (CambiarPosJugador jugador (list posX (- posY 50) ) 1))
-          (else (CambiarPosJugador jugador (list posX (+ posY 50) ) 1))
+          (else (CambiarPosJugador jugador (list posX (+ posY 40) ) 1))
           )))
 
 ;Función que verifica si un jugador esta en condición de disparar el balón
@@ -213,12 +231,101 @@
   (cond ((< objY posY) (* -1 (* (/ (abs(- objY posY)) (abs(- objX posX))) fuerza)));;
         (else (* (/ (abs(- objY posY)) (abs(- objX posX))) fuerza))))
 
+;Función para resetear las posiciones de los jugadores de las nuevas generaciones en cada gol
+
+(define (ResetearPosiciones primeraGeneracion nuevaGeneracion)
+  (let ((listaPrimeraGeneracion (PegarEquipos (car primeraGeneracion) (cadr primeraGeneracion)))
+        (listaNuevaGeneracion (PegarEquipos (car nuevaGeneracion) (cadr nuevaGeneracion))))
+        (ResetearPosiciones-aux listaPrimeraGeneracion listaNuevaGeneracion)))
+
+(define (ResetearPosiciones-aux listaPrimeraGeneracion listaNuevaGeneracion)
+  (cond ((null? listaPrimeraGeneracion) '())
+        (else (cons (CambiarPosJugador (car listaNuevaGeneracion) (ObtenerPosJugador (car listaPrimeraGeneracion)) 1)
+                    (ResetearPosiciones-aux (cdr listaPrimeraGeneracion) (cdr listaNuevaGeneracion))))))
+
+;;Funcion que mueve los jugadores
+(define (MoverJugadores Equipos)
+  (let ((listaJugadores (PegarEquipos (car Equipos) (cadr Equipos)))) (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) 1 '())))
+
+(define (MoverJugadores-aux jugador listaJugadores contador nuevaLista)
+  (cond ((null? listaJugadores) (Invertir nuevaLista '()))
+        ;;Equipo Rojo
+        ((= contador 1) ;;Portero Rojo
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosPorteroRojo jugador) nuevaLista)))
+        ((and (<= contador 11) (<= contador (- 11 CantDelanteros1 CantMedios1))) ;;Defensas rojos
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosDefRojo jugador) nuevaLista)))
+        ((and (<= contador 11) (<= contador (- 11 CantDelanteros1))) ;;Medios rojos
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosMedRojo jugador) nuevaLista)))
+        ((and (<= contador 11)) ;;Delanteros rojos
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosDelRojo jugador) nuevaLista)))
+        ;;Equipo azul
+        ((= contador 12) ;;Portero azul
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosPorteroAzul jugador) nuevaLista)))
+        ((and (<= contador 11) (<= contador (- 22 CantDelanteros1 CantMedios1))) ;;Defensas azul
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosDefAzul jugador) nuevaLista)))
+        ((and (<= contador 11) (<= contador (- 22 CantDelanteros2))) ;;Medios azul
+               (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosMedAzul jugador) nuevaLista)))
+        (else ;;Delanteros azul
+              (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosDelAzul jugador) nuevaLista)))
+        ))
+
+(define (Invertir lista nuevaLista)
+  (cond ((null? lista) nuevaLista)
+        (else (Invertir (cdr lista) (cons (car lista) nuevaLista)))))
+
+
+;;Funciones para averiguar la nueva posicion de todos los jugadores        
+(define (PosPorteroRojo jugador)
+  (cond((< (cadr (ObtenerPosJugador jugador)) 260) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 270) 1));;Limite superior
+                    ((> (cadr (ObtenerPosJugador jugador)) 390) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 380) 1));;Limite inferior
+                    ((> (car (ObtenerPosJugador jugador)) 70) (CambiarPosJugador jugador (cons 60 (cadr (ObtenerPosJugador jugador))) 1));;Limite hacia el centro
+                    (else  (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1))))
+
+(define (PosDefRojo jugador)
+         (cond ((> (car (ObtenerPosJugador jugador)) 400) (CambiarPosJugador jugador (cons 390 (cadr (ObtenerPosJugador jugador))) 1))
+         (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
+(define (PosMedRojo jugador)
+  (cond ((> (car (ObtenerPosJugador jugador)) 800) (CambiarPosJugador jugador (cons 790 (cadr (ObtenerPosJugador jugador))) 1))
+        (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
+
+(define (PosDelRojo jugador)
+        (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)) 
+
+(define (PosPorteroAzul jugador)
+  (cond((< (cadr (ObtenerPosJugador jugador)) 260) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 270) 1));;Limite superior
+       ((> (cadr (ObtenerPosJugador jugador)) 390) (CambiarPosJugador jugador (cons (car (ObtenerPosJugador jugador)) 380) 1));;Limite inferior
+       ((< (car (ObtenerPosJugador jugador)) 1130) (CambiarPosJugador jugador (cons 1140 (cadr (ObtenerPosJugador jugador))) 1));;Limite hacia el centro
+       (else  (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1))))
+
+(define (PosDefAzul jugador)
+       (cond ((< (car (ObtenerPosJugador jugador)) 800) (CambiarPosJugador jugador (cons 810 (cadr (ObtenerPosJugador jugador))) 1))
+       (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
+
+(define (PosMedAzul jugador)
+  (cond ((< (car (ObtenerPosJugador jugador)) 400) (CambiarPosJugador jugador (cons 410 (cadr (ObtenerPosJugador jugador))) 1))
+        (else (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)))) 
+
+(define (PosDelAzul jugador)
+   (CambiarPosJugador jugador (list (+ (car (ObtenerPosJugador jugador))(ApuntarX (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador))) (+ (cadr(ObtenerPosJugador jugador)) (ApuntarY (car(ObtenerPosJugador jugador)) (cadr (ObtenerPosJugador jugador)) PosXBalon PosYBalon (ObtenerVelJugador jugador)))) 1)) 
+
+
+
+;Función que verifica la condición de finalización
+
+(define (VerificarFinal)
+  (cond ((equal? CantGeneraciones ContadorGen) #t)
+        ((and (> PuntosA PuntosR) (equal? 3 (- PuntosA PuntosR)) ) #t)
+        ((and (< PuntosA PuntosR) (equal? 3 (- PuntosR PuntosA)) ) #t)
+        (else #f)))
+
 
 ;Función principal del juego
 (define (CCCE2019 formacion1 formacion2 cantGeneraciones)
   (EstablecerCantGeneraciones cantGeneraciones)
   (EstablecerPrimeraGeneracion (list (primeraGeneracionEquipoIzquierda formacion1) (primeraGeneracionEquipoDerecha formacion2)))
   (DibujarPrimeraGeneracion PrimeraGeneracion))
+
+
 
 ;Función que me dibuja la primera generación
 (define (DibujarPrimeraGeneracion equipos)
@@ -227,38 +334,52 @@
   (DibujarGeneraciones (IncrementoContadorGen))
   (DibujarPuntuacion PuntosA PuntosR)
   (DibujarBalon PosXBalon PosYBalon)
-  (DibujarJugadores (VerificarColisiones equipos) 1)
+  (DibujarJugadores (VerificarColisiones equipos) 1 1)
   (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
   (sleep 1)
   (Main equipos))
 
 ;Ciclo del Juego
 (define (Main equipos)
+  
   ;Se obtiene la nueva generación de equipos
   (define equipoNuevo1 (siguienteEquipo (car equipos) (cadr equipos)))
   (define equipoNuevo2 (siguienteEquipo (car equipos) (cadr equipos)))
   (EstablecerCantDelanteros1 (length (cadddr equipoNuevo1)))
   (EstablecerCantDelanteros2 (length (cadddr equipoNuevo2)))
-  ;(define nuevosEquipos (list equipoNuevo1 equipoNuevo2))
+  (EstablecerCantMedios1 (length (caddr equipoNuevo1)))
+  (EstablecerCantMedios2 (length (caddr equipoNuevo2)))
+  (define nuevosEquipos (list equipoNuevo1 equipoNuevo2))
   
-  ;Se verifican las condiciones de la logica 
-  (VerificarGol)
+  ;Se verifican las condiciones de la logica
+  (if (equal? #t (VerificarFinal)) (Final) #f) 
+  (VerificarGol nuevosEquipos)
   (VerificarReboteBalon)
-  (VerificarDisparo equipos); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
+  (VerificarDisparo nuevosEquipos)
    
-  ;Se dibujan los elementos de la interfaz
+  ;Se dibujan los elementos de la interfaz 
   (DibujarCancha)
   (DibujarGeneraciones (IncrementoContadorGen))
   (DibujarPuntuacion PuntosA PuntosR)
   (DibujarBalon PosXBalon PosYBalon)
-  (DibujarJugadores (VerificarColisiones equipos) 1); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
-
+  (cond ((equal? EsGol #t) (EstablecerEsGol #f) )
+        (else (DibujarJugadores (VerificarColisiones nuevosEquipos) 1 1)))
+   
+       
+        
+  
   ;Se hace la llamada recursiva
   (copy-viewport VentanaOculta VentanaPrincipal);Se dibuja en la ventana oculta y se copia en la principal, con el objetivo de evitar el parpadeo de la pantalla en cada frame del ciclo
   (sleep 0.01)
   (NuevaPosXBalon (+ PosXBalon VelXBalon))
   (NuevaPosYBalon (+ PosYBalon VelYBalon))
-  (Main equipos)); Cuando esten las nuevas posiciones se cambia equipos por nuevosEquipos
+  (Main nuevosEquipos)) 
+
+;Función para el caso donde termina el juego 
+
+(define (Final)
+   (sleep 2) (close-viewport VentanaPrincipal))
+
 
 ;Se invoca al programa
-(CCCE2019 '(0 0 10) '(4 4 2) 20)
+(CCCE2019 '(4 4 2) '(4 4 2) 100000)
