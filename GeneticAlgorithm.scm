@@ -160,7 +160,8 @@
         ((zero? cantMedioCampistas) 
             '())
         (else 
-            (cons   (append (jugadorBase) (list (list posicionX (definirPosicionY cantMedioCampistasOriginal cantMedioCampistas)) 0)) 
+            (cons   (append (jugadorBase) 
+                    (list (list (+ posicionX (random -75 25)) (+ (definirPosicionY cantMedioCampistasOriginal cantMedioCampistas) (random -50  25))) 0)) 
                     (medioCampista (- cantMedioCampistas 1) posicionX cantMedioCampistasOriginal))))) 
 
 ;;Funcion que genera una lista de delanteros
