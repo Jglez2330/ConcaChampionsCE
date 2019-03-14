@@ -4,6 +4,7 @@
 (provide primeraGeneracionEquipoIzquierda)
 (provide primeraGeneracionEquipoDerecha)
 
+
 (require racket/include)
 
 ;; Funcion que recibe el gen de un individuo  y calcula el fitness de este
@@ -127,7 +128,7 @@
 ;;S: lista con los genes de velocidad, fuerza y habilidas respectivos
 
 (define (jugadorBase)
-    (list (+ (random 10) 1) (+ (random 10) 1) (+ (random 10) 1)))
+    (list (+ (random 10) 1) (+ (random 10 20) 1) (+ (random 10) 1)))
 
 
 ;;Funcion que genera un portero 
