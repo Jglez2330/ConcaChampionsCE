@@ -262,7 +262,7 @@
         ;;Equipo azul
         ((= contador 12) ;;Portero azul
                (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosPorteroAzul jugador) nuevaLista)))
-        ((and (<= contador 22) (<= contador (- 22 CantDelanteros1 CantMedios1))) ;;Defensas azul
+        ((and (<= contador 22) (<= contador (- 22 CantDelanteros2 CantMedios2))) ;;Defensas azul
                (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosDefAzul jugador) nuevaLista)))
         ((and (<= contador 22) (<= contador (- 22 CantDelanteros2))) ;;Medios azul
                (MoverJugadores-aux (car listaJugadores) (cdr listaJugadores) (+ 1 contador) (cons (PosMedAzul jugador) nuevaLista)))
@@ -336,7 +336,7 @@
 ;Función que verifica la condición de finalización
 
 (define (VerificarFinal)
-  (cond ((equal? CantGeneraciones ContadorGen) #t)
+  (cond ((>= (/ ContadorGen 3) CantGeneraciones) #t)
         ((and (> PuntosA PuntosR) (equal? 3 (- PuntosA PuntosR)) ) #t)
         ((and (< PuntosA PuntosR) (equal? 3 (- PuntosR PuntosA)) ) #t)
         (else #f)))
@@ -352,6 +352,10 @@
 (define (CCCE2019 formacion1 formacion2 cantGeneraciones)
   (EstablecerCantGeneraciones cantGeneraciones)
   (EstablecerPrimeraGeneracion (list (primeraGeneracionEquipoIzquierda formacion1) (primeraGeneracionEquipoDerecha formacion2)))
+  (EstablecerCantDelanteros1 (length (cadddr (car PrimeraGeneracion))))
+  (EstablecerCantDelanteros2 (length (cadddr (cadr PrimeraGeneracion))))
+  (EstablecerCantMedios1 (length (caddr (car PrimeraGeneracion))))
+  (EstablecerCantMedios2 (length (caddr (cadr PrimeraGeneracion))))
   (DibujarPrimeraGeneracion PrimeraGeneracion))
 
 ;Función que me dibuja la primera generación
@@ -371,11 +375,6 @@
   ;Se obtiene la nueva generación de equipos
   (define equipoNuevo1 (siguienteEquipo (car equipos) (cadr equipos)))
   (define equipoNuevo2  (siguienteEquipo (car equipos) (cadr equipos)))
-  (EstablecerCantDelanteros1 (length (cadddr equipoNuevo1)))
-  (EstablecerCantDelanteros2 (length (cadddr equipoNuevo2)))
-  (EstablecerCantMedios1 (length (caddr equipoNuevo1)))
-  (EstablecerCantMedios2 (length (caddr equipoNuevo2)))
-
   (cond ((equal? ContadorCambio 3) (begin (HacerCambio 0) (EstablecerNuevosEquipos (list equipoNuevo1 equipoNuevo2))
   (EstablecerNuevosEquipos2 (InsertarPosNuevosEquipos (PegarEquipos (car NuevosEquipos) (cadr NuevosEquipos) ) (MoverJugadores-aux (car listaEquipos) (cdr listaEquipos) 1 '())))))
   (else (begin (IncrementarCambio) (EstablecerNuevosEquipos equipos)
@@ -388,7 +387,7 @@
   (VerificarReboteBalon)
   (VerificarDisparo-aux (car NuevosEquipos2) (cdr NuevosEquipos2) 1)
    
-  ;Se dibujan los elementos de la interfaz  
+  ;Se dibujan los elementos de la interfaz   
   (DibujarCancha)
   (DibujarGeneraciones (IncrementoContadorGen)) 
   (DibujarPuntuacion PuntosA PuntosR)
@@ -409,4 +408,4 @@
     (sleep 2) (close-viewport VentanaPrincipal))
 
 ;Se invoca al programa
-(CCCE2019 '(4 4 2) '(4 4 2) 10000000)
+(CCCE2019 '(5 4 1) '(4 4 2) 301)
