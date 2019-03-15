@@ -408,4 +408,4 @@
     (sleep 2) (close-viewport VentanaPrincipal))
 
 ;Se invoca al programa
-(CCCE2019 '(5 4 1) '(4 4 2) 301)
+(CCCE2019 '(4 5 2) '(4 4 2) 301)

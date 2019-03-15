@@ -38,7 +38,7 @@
     (+ (car genPortero) (cadr genPortero) (caddr genPortero)))
 
 
-;;Funcion que calcula la representacion numerica de la aptitud del medio campista y la agrega a la lista
+;;Funcion que calcula la representacion numerica de la aptitud del mediocampista y la agrega a la lista
 ;;E: Una lista que representa al jugador 
 ;;S: Una lista que representa un jugador con la aptitud calculada en la ultima posicion
 
@@ -213,15 +213,18 @@
     (+ (abs (- (* (quotient 650 cantJugadoresOriginal) cantJugadores) 650)) (quotient (quotient 650 cantJugadoresOriginal) 3)))
 ;;----------------------------------------------- Fin de la funciones de la primera generacion -------------------------------------------
 
-;;
-;;
-;;
+;;Funcion que realica el cruzamiento de la lista de padres a con los padres b
+;;E: lista de padres a, lista de padres b, lista de hijos, funcion para calcular la aptitud
+;;S: lista de posibles hijos a ser seleccionados
 (define (crossover ParentsA ParentsB offspring funcionAptitud)
     (cond 
         ( (null? ParentsA )
             offspring)
         (else 
             (crossover (cdr ParentsA) ParentsB (append offspring (crossover-aux (car ParentsA) ParentsB funcionAptitud)) funcionAptitud))))
+;;Funcion que calcula los hijos de un padre espacifico contra todos los padres de la lista b
+;;E: un padreA, una lista de padres B, la funcion de aptitud 
+;;S: Lista con los posibles hijos del padre a a ser seleccionados del 
 
 (define (crossover-aux ParentA ParentsB funcionAptitud)
     (cond 
@@ -231,12 +234,18 @@
             (cons 
              (append  (list (caar ParentsB) (cadr ParentA) (caddar ParentsB)) (cdddr ParentA))
                 (crossover-aux ParentA (cdr ParentsB) funcionAptitud) ))))
+;;Funcion que obtiene todos los posibles cruzamientos de porteros
+;;E: equipo a , equipo b
+;;S: lista con todos los posibles hijos porteros
 
 (define (hijosPortero  EquipoA EquipoB)
     (append (crossover (car EquipoA) (car EquipoB) '() fitnessPortero) 
            (crossover (car EquipoB) (car EquipoA) '() fitnessPortero)
            (crossover (car EquipoB) (car EquipoB) '() fitnessPortero)
            (crossover (car EquipoA) (car EquipoA) '() fitnessPortero)))
+;;Funcion que obtiene  todos los posibles hijos para los defensas
+;;E: equipo a , equipo b
+;;S: lista con todos los posibles defensas
 
 (define (hijosDefensas EquipoA EquipoB)
     (cond ((null? (cadr EquipoA)) 
@@ -248,6 +257,10 @@
                     (crossover (cadr EquipoB) (cadr EquipoA) '() fitnessDefensa)
                     (crossover (cadr EquipoB) (cadr EquipoB) '() fitnessDefensa)
                     (crossover (cadr EquipoA) (cadr EquipoA) '() fitnessDefensa)))))
+
+;;Funcion que obtiene todos los posibles mediocampistas
+;;E: equipo a , equipo b
+;;S: lista con todos los posibles hijos mediocampistas
 (define (hijosMedio EquipoA EquipoB)
     (cond 
         ((null? EquipoA) 
@@ -260,6 +273,10 @@
                     (crossover (caddr EquipoB) (caddr EquipoB) '() fitnessMedioCampista)
                     (crossover (caddr EquipoA) (caddr EquipoA) '() fitnessMedioCampista)))))
 
+                
+;;Funcion que obtiene todos los posibles Delanteros
+;;E: lista equipoa , lista equipo b
+;;S: lista con todos los posibles hijos delanteros
 (define (hijosDelantero EquipoA EquipoB)
     (cond 
         ((null? EquipoA) 
@@ -272,6 +289,9 @@
                     (crossover (cadddr EquipoA) (cadddr EquipoA) '() fitnessDelantero)
                     (crossover (cadddr EquipoB) (cadddr EquipoB) '() fitnessDelantero)))))
 
+;;Funcion que obtiene las listas de todos los posibles puestos
+;;E: lista equipo a , lista equipo b
+;;S: Lista con las listas de posibles hijos de sus posiciones
 (define (hijosEquipo EquipoA EquipoB)
     (append (list (fitnessPorteros (mutacion (hijosPortero EquipoA EquipoB) 77))) 
             (list (aptitudDefensas (mutacion (hijosDefensas EquipoA EquipoB) 33))) 
@@ -280,7 +300,9 @@
 
 
 
-
+;;Funcion que modifica aleatoriamente el gen de un jugador
+;;E: Lista de juagdores, valor nuemrico del porcentaje de mutacion
+;;s: Una lista de jugadores que puede tener valores deintintos en los genes comparado a la original
 (define (mutacion ListaJugadoresMutar porcentajeMutacion)
     (cond 
         ((null? ListaJugadoresMutar)
@@ -289,18 +311,29 @@
             (cons (mutacion-aux (car ListaJugadoresMutar) (random 3)) (mutacion (cdr ListaJugadoresMutar) porcentajeMutacion)))
         (else 
             (cons (car ListaJugadoresMutar) (mutacion (cdr ListaJugadoresMutar) porcentajeMutacion)))))
+
+;;Funcion que realiza un cambio en el gen del jugador
+;;E: jugador a mutar, campo que se va a mutar
+;;S: el jugador mutado con un valor aleatorio
 (define (mutacion-aux individuoAMutar campoMutar)
     (cond 
         ((zero? campoMutar) 
             (cons (random 1 11) (cdr individuoAMutar)))
         (else 
             (cons (car individuoAMutar) (mutacion-aux (cdr individuoAMutar) (- campoMutar 1))))))
+;;Funcion que obtiene el mejor portero o mas apto
+;;E: portero, lista de hijos de porteros
+;;S: un portero
 (define (obtenerProximaGeneracionPorteros  portero proximaGeneracionPorterosLista)
     (cond 
         ((null? proximaGeneracionPorterosLista)
             '())
         (else 
             (list(car proximaGeneracionPorterosLista)))))
+
+;;Funcion que obtiene solo los defensas mas aptos
+;;E:  lista de defensas, lista de los hijos de los defensas
+;;S:  lista de los defensas mas aptos
 (define (obtenerProximaGeneracionDefensas defensas proximaGeneracionDefensasLista)
     (cond 
         ((null? defensas) 
@@ -311,6 +344,10 @@
         (else 
             (cons (cambiarPosicion (car proximaGeneracionDefensasLista) (car defensas) fitnessDefensa) 
                     (obtenerProximaGeneracionDefensas (cdr defensas) (cdr proximaGeneracionDefensasLista))))))
+
+;;Funcion que obtiene solo los mediocampistas mas aptos
+;;E: lista de mediocampistas, hijos de los medio campistas
+;;S: lista de los mediocampistas mas aptos
 (define (obtenerProximaGeneracionMedioCampistas medioCampistasLista hijosMedioCampistasLista)
     (cond 
         ((null? medioCampistasLista ) 
@@ -321,7 +358,9 @@
         (else 
             (cons (cambiarPosicion (car hijosMedioCampistasLista) (car medioCampistasLista) fitnessMedioCampista) 
                     (obtenerProximaGeneracionMedioCampistas (cdr medioCampistasLista) (cdr hijosMedioCampistasLista))))))
-
+;;Obtiene solo los delanteros mas aptos
+;;E: lista de delanteros, hijos delanteros
+;;S: Lista con los delanteros con la mejor aptitud
 (define (obtenerProximaGeneracionDelanteros delanterosLista hijosDelanterosLista)
     (cond 
         ((null? delanterosLista) 
@@ -334,7 +373,9 @@
                     (obtenerProximaGeneracionDelanteros (cdr delanterosLista) (cdr hijosDelanterosLista))))))
 (define (cambiarPosicion hijo padre funcionAptitud)
     (funcionAptitud (append (list (car hijo) (cadr hijo) (caddr hijo) (cadddr padre) ) )))
-
+;;Funcion que genera el siguiente equipo
+;;E: equipo a, Equipo b
+;;S: una lista con el siguiente equipo a jugar
 (define (siguienteEquipo EquipoA EquipoB)
     (list (obtenerProximaGeneracionPorteros (car EquipoA) (quicksort- (car(hijosEquipo EquipoA EquipoB)) fitnessPortero-aux)) 
             (obtenerProximaGeneracionDefensas (cadr EquipoA) (quicksort- (cadr( hijosEquipo EquipoA EquipoB)) fitnessDefensa-aux))
